@@ -25,6 +25,27 @@ import subprocess
 import threading
 import webbrowser
 from pathlib import Path
+import re
+import math
+
+def evaluate_math(expr: str):
+    if not re.search(r'\d', expr): return None
+    try:
+        if len(expr) > 100: return None
+        if not re.search(r'[\+\-\*\/\(\)\^]', expr):
+            if not any(f in expr for f in ['sqrt', 'sin', 'cos', 'tan', 'pi', 'abs']):
+                return None
+        allowed = {k: v for k, v in math.__dict__.items() if not k.startswith('_')}
+        allowed.update({'abs': abs, 'round': round})
+        res = eval(expr.replace('^', '**'), {'__builtins__': {}}, allowed)
+        if isinstance(res, (int, float)):
+            if isinstance(res, float) and res.is_integer():
+                return int(res)
+            return round(res, 6)
+        return None
+    except Exception:
+        return None
+
 from tkinter import (
     Tk, Toplevel, Frame, Label, Entry, StringVar, Canvas, PhotoImage, filedialog,
     messagebox, simpledialog, ttk, END, BOTH, X, Y, LEFT, RIGHT, TOP, BOTTOM, E, W
@@ -612,32 +633,36 @@ class GroupManagerDialog(Toplevel):
 
         left = Frame(body, bg=C.BG)
         left.pack(side=LEFT, fill=Y, padx=(0, 12))
-        mk_label(left, "Danh sách nhóm", kind="muted", bg=C.BG).pack(anchor=W, pady=(0, 4))
+        mk_label(left, "Danh sách nhóm", kind="muted", bg=C.BG).pack(side=TOP, anchor=W, pady=(0, 4))
+
+        gbtns = Frame(left, bg=C.BG)
+        gbtns.pack(side=BOTTOM, fill=X, pady=(8, 0))
+        mk_button(gbtns, "+ Tạo nhóm mới", command=self.create_group, kind="primary").pack(fill=X, pady=(0, 5))
+        mk_button(gbtns, "Đổi tên nhóm", command=self.rename_group, kind="secondary").pack(fill=X, pady=(0, 5))
+        mk_button(gbtns, "Xoá nhóm", command=self.delete_group, kind="danger").pack(fill=X)
 
         left_card = mk_card(left)
-        left_card.pack(fill=Y)
+        left_card.pack(side=TOP, fill=BOTH, expand=True)
         self.group_list = ttk.Treeview(left_card, columns=("name",), show="headings", height=10)
         self.group_list.heading("name", text="Tên nhóm")
         self.group_list.column("name", width=190)
         style_treeview_stripes(self.group_list)
-        self.group_list.pack(fill=Y, padx=1, pady=1)
+        self.group_list.pack(fill=BOTH, expand=True, padx=1, pady=1)
         self.group_list.bind("<<TreeviewSelect>>", lambda e: self.refresh_members())
-
-        gbtns = Frame(left, bg=C.BG)
-        gbtns.pack(fill=X, pady=8)
-        mk_button(gbtns, "+ Tạo nhóm mới", command=self.create_group, kind="primary").pack(fill=X, pady=(0, 5))
-        mk_button(gbtns, "Đổi tên nhóm", command=self.rename_group, kind="secondary").pack(fill=X, pady=(0, 5))
-        mk_button(gbtns, "Xoá nhóm", command=self.delete_group, kind="danger").pack(fill=X)
 
         right = Frame(body, bg=C.BG)
         right.pack(side=LEFT, fill=BOTH, expand=True)
         mk_label(
             right, "File PDF trong nhóm đã chọn (chọn dòng để bớt khỏi nhóm):",
             kind="muted", bg=C.BG,
-        ).pack(anchor=W, pady=(0, 4))
+        ).pack(side=TOP, anchor=W, pady=(0, 4))
+
+        rbtns = Frame(right, bg=C.BG)
+        rbtns.pack(side=BOTTOM, fill=X, pady=(8, 0))
+        mk_button(rbtns, "Bớt file đã chọn khỏi nhóm", command=self.remove_members, kind="secondary").pack(anchor=W)
 
         member_card = mk_card(right)
-        member_card.pack(fill=BOTH, expand=True, pady=(0, 8))
+        member_card.pack(side=TOP, fill=BOTH, expand=True)
         self.member_list = ttk.Treeview(
             member_card, columns=("name", "path"), show="headings", selectmode="extended", height=8
         )
@@ -647,8 +672,6 @@ class GroupManagerDialog(Toplevel):
         self.member_list.column("path", width=380)
         style_treeview_stripes(self.member_list)
         self.member_list.pack(fill=BOTH, expand=True, padx=1, pady=1)
-
-        mk_button(right, "Bớt file đã chọn khỏi nhóm", command=self.remove_members, kind="secondary").pack(anchor=W)
 
         self._reload_group_list()
 
@@ -673,7 +696,7 @@ class GroupManagerDialog(Toplevel):
             return
         name = name.strip()
         if name in self.groups:
-            messagebox.showwarning("Trùng tên", "Nhóm này đã tồn tại.")
+            messagebox.showwarning("Trùng tên", "Nhóm này đã tồn tại.", parent=self)
             return
         self.groups[name] = []
         self._reload_group_list()
@@ -682,7 +705,7 @@ class GroupManagerDialog(Toplevel):
     def rename_group(self):
         sel = self.group_list.selection()
         if not sel:
-            messagebox.showinfo("Chưa chọn", "Hãy chọn 1 nhóm trước.")
+            messagebox.showinfo("Chưa chọn", "Hãy chọn 1 nhóm trước.", parent=self)
             return
         old = sel[0]
         new = simpledialog.askstring("Đổi tên nhóm", "Tên nhóm mới:", initialvalue=old, parent=self)
@@ -690,7 +713,7 @@ class GroupManagerDialog(Toplevel):
             return
         new = new.strip()
         if new in self.groups:
-            messagebox.showwarning("Trùng tên", "Đã có nhóm với tên này.")
+            messagebox.showwarning("Trùng tên", "Đã có nhóm với tên này.", parent=self)
             return
         self.groups[new] = self.groups.pop(old)
         self._reload_group_list()
@@ -699,11 +722,11 @@ class GroupManagerDialog(Toplevel):
     def delete_group(self):
         sel = self.group_list.selection()
         if not sel:
-            messagebox.showinfo("Chưa chọn", "Hãy chọn 1 nhóm trước.")
+            messagebox.showinfo("Chưa chọn", "Hãy chọn 1 nhóm trước.", parent=self)
             return
         gname = sel[0]
         if messagebox.askyesno(
-            "Xác nhận", f"Xoá nhóm '{gname}'?\n(Các file PDF vẫn giữ nguyên trong danh sách chính.)"
+            "Xác nhận", f"Xoá nhóm '{gname}'?\n(Các file PDF vẫn giữ nguyên trong danh sách chính.)", parent=self
         ):
             self.groups.pop(gname, None)
             self._reload_group_list()
@@ -717,7 +740,7 @@ class GroupManagerDialog(Toplevel):
         gname = sel_g[0]
         sel_m = self.member_list.selection()
         if not sel_m:
-            messagebox.showinfo("Chưa chọn", "Hãy chọn file cần bớt khỏi nhóm.")
+            messagebox.showinfo("Chưa chọn", "Hãy chọn file cần bớt khỏi nhóm.", parent=self)
             return
         paths_to_remove = {self.member_list.item(s, "values")[1] for s in sel_m}
         self.groups[gname] = [p for p in self.groups.get(gname, []) if p not in paths_to_remove]
@@ -835,7 +858,7 @@ class RoundedSearchBox(Frame):
     def __init__(
         self, parent, textvariable=None, placeholder="",
         font=None, radius=12, bg_parent="#FFFFFF", fill_bg="#F8FAFC",
-        border_color="#CBD5E1", focus_color="#2563EB",
+        border_color="#CBD5E1", focus_color="#2563EB", text_color="#1E293B",
         extra_btn_text="", extra_btn_cmd=None, extra_btn_tooltip="",
         **kwargs
     ):
@@ -846,6 +869,7 @@ class RoundedSearchBox(Frame):
         self.fill_bg = fill_bg
         self.border_color = border_color
         self.focus_color = focus_color
+        self.text_color = text_color
         self.is_focused = False
         self.is_hovered = False
         self.placeholder = placeholder
@@ -867,8 +891,8 @@ class RoundedSearchBox(Frame):
         # Ô nhập Entry không viền (độ rộng tự động tính toán theo toàn bộ chiều rộng)
         self.entry = Entry(
             self.canvas, textvariable=self.textvariable, font=self.font,
-            bg=self.fill_bg, fg=getattr(C, "TEXT", "#1E293B"),
-            relief="flat", bd=0, insertbackground=getattr(C, "TEXT", "#1E293B"),
+            bg=self.fill_bg, fg=self.text_color,
+            relief="flat", bd=0, insertbackground=self.text_color,
         )
         self.entry_win = self.canvas.create_window(16, self.box_height // 2, window=self.entry, anchor="w")
 
@@ -1131,7 +1155,7 @@ class RoundedSearchBox(Frame):
 # - Không bị răng cưa hay vệt đen viền, hiển thị trơn mịn sắc nét
 # ---------------------------------------------------------------------------
 class QuickSearchOverlay(Toplevel):
-    MAX_RESULTS = 8
+    MAX_RESULTS = 50
     WIDTH = 580
 
     def __init__(self, app: "BookmarkApp"):
@@ -1140,6 +1164,10 @@ class QuickSearchOverlay(Toplevel):
         self.overrideredirect(True)
         self.attributes("-topmost", True)
         self.WIDTH = 580
+        self.history_mode = False
+        self.config = app.config
+        if "history" not in self.config:
+            self.config["history"] = []
 
         # Nền tinh tế, viền mảnh 1px chuẩn
         self.configure(bg=C.SURFACE, highlightthickness=1, highlightbackground=C.BORDER)
@@ -1153,6 +1181,17 @@ class QuickSearchOverlay(Toplevel):
         # Cụm công cụ bên phải (Nút mở rộng)
         self.right_tools = Frame(self.input_card, bg=C.SURFACE)
         self.right_tools.pack(side=RIGHT, fill=Y, padx=(0, 4))
+
+        # Nút lịch sử
+        self.history_btn = Label(
+            self.right_tools, text="🕒", font=F(12),
+            bg=C.SURFACE, fg=C.TEXT_MUTED, cursor="hand2",
+            padx=6, pady=6
+        )
+        self.history_btn.pack(side=RIGHT)
+        self.history_btn.bind("<Button-1>", lambda e: self.toggle_history())
+        self.history_btn.bind("<Enter>", lambda e: self.history_btn.configure(fg=C.PRIMARY))
+        self.history_btn.bind("<Leave>", lambda e: self.history_btn.configure(fg=C.TEXT_MUTED))
 
         # Nút mở rộng ↗ góc trên
         self.expand_btn = Label(
@@ -1206,7 +1245,31 @@ class QuickSearchOverlay(Toplevel):
         # Khung danh sách kết quả (chỉ mở rộng khi người dùng gõ từ khóa)
         self.results_wrapper = Frame(self, bg=C.SURFACE)
         self.separator = Frame(self.results_wrapper, bg=C.BORDER, height=1)
-        self.results_frame = Frame(self.results_wrapper, bg=C.SURFACE)
+        
+        self.results_container = Frame(self.results_wrapper, bg=C.SURFACE)
+        self.results_canvas = Canvas(self.results_container, bg=C.SURFACE, highlightthickness=0)
+        self.results_scrollbar = ttk.Scrollbar(self.results_container, orient="vertical", command=self.results_canvas.yview)
+        self.results_canvas.configure(yscrollcommand=self.results_scrollbar.set)
+        
+        self.results_frame = Frame(self.results_canvas, bg=C.SURFACE)
+        self.results_window = self.results_canvas.create_window((0, 0), window=self.results_frame, anchor="nw")
+        
+        def _on_frame_configure(event):
+            self.results_canvas.configure(scrollregion=self.results_canvas.bbox("all"))
+        self.results_frame.bind("<Configure>", _on_frame_configure)
+        
+        def _on_canvas_configure(event):
+            self.results_canvas.itemconfig(self.results_window, width=event.width)
+        self.results_canvas.bind("<Configure>", _on_canvas_configure)
+        
+        self.results_canvas.pack(side=LEFT, fill=BOTH, expand=True)
+        self.results_scrollbar.pack(side=RIGHT, fill=Y)
+        
+        # Thêm sự kiện cuộn chuột
+        def _on_mousewheel(event):
+            if self.results_canvas.winfo_exists():
+                self.results_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        self.bind("<MouseWheel>", _on_mousewheel)
         self.footer_hint = Label(
             self.results_wrapper,
             text="↑↓ chọn · Enter mở · ↗ mở rộng · Esc đóng",
@@ -1224,9 +1287,16 @@ class QuickSearchOverlay(Toplevel):
         self.entry.bind("<FocusOut>", lambda e: self.configure(highlightbackground=C.BORDER))
         self.entry.bind("<Down>", self._move_down)
         self.entry.bind("<Up>", self._move_up)
+        self.entry.bind("<Control-h>", lambda e: [self.toggle_history(), "break"][1])
+        def on_right(e):
+            self.toggle_history()
+            return "break"
+        self.entry.bind("<Right>", on_right)
         self.entry.bind("<Return>", self._open_selected)
         self.entry.bind("<Escape>", lambda e: self.hide())
         self.bind("<Escape>", lambda e: self.hide())
+        self.entry.bind("<F1>", lambda e: self.app.show_help())
+        self.bind("<F1>", lambda e: self.app.show_help())
         self.bind("<FocusOut>", self._on_focus_out)
 
         self._place_on_screen()
@@ -1270,10 +1340,15 @@ class QuickSearchOverlay(Toplevel):
 
     def _place_on_screen(self):
         self.update_idletasks()
-        w = max(self.WIDTH, self.winfo_reqwidth())
+        # Cố định bề rộng 760 để tránh bị giật/nhảy kích thước khi có kết quả
+        self.WIDTH = 760
+        w = self.WIDTH
         h = self.winfo_reqheight()
         sw = self.winfo_screenwidth()
         sh = self.winfo_screenheight()
+        max_h = int(sh * 0.7)
+        if h > max_h:
+            h = max_h
         x = max(0, (sw - w) // 2)
         y = max(0, int(sh * 0.18))
         self.geometry(f"{w}x{h}+{x}+{y}")
@@ -1307,6 +1382,27 @@ class QuickSearchOverlay(Toplevel):
         self.app.search_var.set(query)
         self.app.apply_filter()
 
+    def toggle_history(self):
+        self.history_mode = not self.history_mode
+        self.history_btn.configure(fg=C.PRIMARY if self.history_mode else C.TEXT_MUTED)
+        if self.history_mode:
+            self.lens_icon.configure(text="🕒")
+            self.query_var.set("")
+        else:
+            self.lens_icon.configure(text="⌕")
+        self._run_search()
+        self.entry.focus_set()
+
+    def add_history(self, htype, query, result=""):
+        if not query: return
+        history = self.config.setdefault("history", [])
+        history = [h for h in history if not (h.get("query") == query and h.get("type") == htype)]
+        history.append({"type": htype, "query": query, "result": result})
+        if len(history) > 20:
+            history = history[-20:]
+        self.config["history"] = history
+        self.app._save_config()
+
     def hide(self):
         if self._closing:
             return
@@ -1326,13 +1422,35 @@ class QuickSearchOverlay(Toplevel):
 
     def _run_search(self):
         query = self.query_var.get().strip()
+        
+        math_res = evaluate_math(query)
+        
+        if self.history_mode:
+            history = self.config.get("history", [])
+            # Lấy 14 dòng cuối, không lọc để giữ nguyên danh sách
+            hist_items = [("history", item, 1) for item in reversed(history[-14:])]
+            
+            if math_res is not None:
+                live_item = ("live_math", {"query": query, "result": math_res}, 1)
+            else:
+                live_item = ("live_math", {"query": " ", "result": ""}, 1)
+                
+            self._results = [live_item] + hist_items
+            self._render_results()
+            return
+            
+        if math_res is not None:
+            self._results = [("math", {"query": query, "result": math_res}, 1)]
+            self._render_results()
+            return
+
         df = self.app.df
         results = []
         if query and df is not None and not df.empty:
             for idx, row in df.iterrows():
                 score = match_score(query, row["title"], row["parent_path"], row["pdf_name"])
                 if score > 0:
-                    results.append((idx, row, score))
+                    results.append(("pdf", row, score))
             results.sort(key=lambda t: t[2], reverse=True)
             results = results[: self.MAX_RESULTS]
         self._results = results
@@ -1354,8 +1472,10 @@ class QuickSearchOverlay(Toplevel):
 
         self.results_wrapper.pack(fill=BOTH, expand=True)
         self.separator.pack(fill=X)
-        self.results_frame.pack(fill=BOTH, expand=True, padx=4, pady=4)
+        self.results_container.pack(fill=BOTH, expand=True, padx=4, pady=4)
         self.footer_hint.pack(anchor=E, padx=12, pady=(2, 6))
+        if hasattr(self, 'results_canvas'):
+            self.results_canvas.yview_moveto(0)
 
         if not self._results:
             msg = "Không tìm thấy bookmark phù hợp."
@@ -1366,41 +1486,70 @@ class QuickSearchOverlay(Toplevel):
             self._place_on_screen()
             return
 
-        for i, (idx, row, score) in enumerate(self._results):
+        for i, (rtype, row, score) in enumerate(self._results):
             row_frame = Frame(self.results_frame, bg=C.SURFACE, cursor="hand2")
             row_frame.pack(fill=X, pady=1)
 
-            title_txt = ("    " * int(row.get("level", 0) or 0)) + str(row["title"])
-            
             from tkinter import Text
             main = Text(row_frame, bg=C.SURFACE, fg=C.TEXT, font=F(10, "bold"), height=1, bd=0, highlightthickness=0, cursor="hand2")
-            main.pack(anchor=W, padx=10, pady=(4, 0), fill=X)
-            main.insert("1.0", title_txt)
-            main.tag_configure("highlight", foreground=C.PRIMARY, font=F(10, "bold"))
             
-            # Highlight tung tu khoa (fuzzy)
-            from text_search import normalize, tokenize
-            for token in tokenize(normalize(query)):
-                start = "1.0"
-                while True:
-                    # Can tim kiem ko dau tren text hien thi
-                    # Cai nay hoi phuc tap, xai tam tim kiem co ban
-                    pos = main.search(token, start, stopindex="end", nocase=True)
-                    if not pos:
-                        break
-                    end = f"{pos}+{len(token)}c"
-                    main.tag_add("highlight", pos, end)
-                    start = end
-            
-            main.configure(state="disabled")
+            if rtype == "math":
+                main.configure(font=F(12, "bold"))
+                main.pack(anchor=W, padx=10, pady=(8, 8), fill=X)
+                main.insert("1.0", f"🖩  {row['result']}")
+                main.configure(state="disabled")
+                subl = Label(row_frame, text="Nhấn Enter để copy kết quả", bg=C.SURFACE, fg=C.TEXT_MUTED, font=F(8.5), anchor="w")
+                subl.pack(anchor=W, padx=10, pady=(0, 4), fill=X)
+                
+            elif rtype == "live_math":
+                main.configure(font=F(12, "bold"))
+                main.pack(anchor=W, padx=10, pady=(8, 8), fill=X)
+                if row['result'] != "":
+                    main.insert("1.0", f"🖩  {row['result']}")
+                    subl = Label(row_frame, text="Nhấn Enter để tính tiếp", bg=C.SURFACE, fg=C.TEXT_MUTED, font=F(8.5), anchor="w")
+                else:
+                    main.insert("1.0", " ")
+                    subl = Label(row_frame, text=" ", bg=C.SURFACE, fg=C.SURFACE, font=F(8.5), anchor="w")
+                main.configure(state="disabled")
+                subl.pack(anchor=W, padx=10, pady=(0, 4), fill=X)
+                
 
-            sub = f"• {row['pdf_name']}"
-            if row.get("parent_path"):
-                sub += f"   ›  {row['parent_path']}"
-            if row.get("page") is not None:
-                sub += f"    ·  Trang {row['page']}"
-            subl = Label(row_frame, text=sub, bg=C.SURFACE, fg=C.TEXT_MUTED, font=F(8.5), anchor="w")
-            subl.pack(anchor=W, padx=10, pady=(0, 4), fill=X)
+            elif rtype == "history":
+                main.pack(anchor=W, padx=10, pady=(6, 2), fill=X)
+                if row.get("type") == "math":
+                    main.insert("1.0", f"🖩 {row['query']} = {row['result']}")
+                    subl = Label(row_frame, text="Nhấn Enter để tính tiếp", bg=C.SURFACE, fg=C.TEXT_MUTED, font=F(8.5), anchor="w")
+                else:
+                    main.insert("1.0", f"🕒 {row['query']}")
+                    subl = Label(row_frame, text="Nhấn Enter để tìm kiếm", bg=C.SURFACE, fg=C.TEXT_MUTED, font=F(8.5), anchor="w")
+                main.configure(state="disabled")
+                subl.pack(anchor=W, padx=10, pady=(0, 6), fill=X)
+                
+            elif rtype == "pdf":
+                main.pack(anchor=W, padx=10, pady=(4, 0), fill=X)
+                title_txt = ("    " * int(row.get("level", 0) or 0)) + str(row["title"])
+                main.insert("1.0", title_txt)
+                main.tag_configure("highlight", foreground=C.PRIMARY, font=F(10, "bold"))
+                
+                from text_search import normalize, tokenize
+                for token in tokenize(normalize(query)):
+                    start = "1.0"
+                    while True:
+                        pos = main.search(token, start, stopindex="end", nocase=True)
+                        if not pos:
+                            break
+                        end = f"{pos}+{len(token)}c"
+                        main.tag_add("highlight", pos, end)
+                        start = end
+                
+                main.configure(state="disabled")
+                sub = f"• {row['pdf_name']}"
+                if row.get("parent_path"):
+                    sub += f"   ›  {row['parent_path']}"
+                if row.get("page") is not None:
+                    sub += f"    ·  Trang {row['page']}"
+                subl = Label(row_frame, text=sub, bg=C.SURFACE, fg=C.TEXT_MUTED, font=F(8.5), anchor="w")
+                subl.pack(anchor=W, padx=10, pady=(0, 4), fill=X)
 
             for widget in (row_frame, main, subl):
                 widget.bind("<Button-1>", lambda e, i=i: self._open_index(i))
@@ -1417,6 +1566,21 @@ class QuickSearchOverlay(Toplevel):
             w.configure(bg=bg)
             for child in w.winfo_children():
                 child.configure(bg=bg)
+        
+        if 0 <= i < len(self._row_widgets) and hasattr(self, 'results_canvas') and self.results_canvas.winfo_exists():
+            w = self._row_widgets[i]
+            self.results_frame.update_idletasks()
+            item_y = w.winfo_y()
+            item_h = w.winfo_height()
+            canvas_h = self.results_canvas.winfo_height()
+            frame_h = self.results_frame.winfo_height()
+            if frame_h > 0:
+                y0 = self.results_canvas.canvasy(0)
+                y1 = y0 + canvas_h
+                if item_y < y0:
+                    self.results_canvas.yview_moveto(item_y / frame_h)
+                elif item_y + item_h > y1:
+                    self.results_canvas.yview_moveto((item_y + item_h - canvas_h) / frame_h)
 
     def _move_down(self, event=None):
         if self._results:
@@ -1430,9 +1594,44 @@ class QuickSearchOverlay(Toplevel):
 
     def _open_index(self, i: int):
         if 0 <= i < len(self._results):
-            _idx, row, _score = self._results[i]
-            self.app.open_bookmark_row(row)
-            self.hide()
+            rtype, row, _score = self._results[i]
+            
+            if rtype == "math":
+                self.clipboard_clear()
+                self.clipboard_append(str(row["result"]))
+                self.add_history("math", row["query"], str(row["result"]))
+                self.hide()
+                
+            elif rtype == "live_math":
+                if row['result'] != "":
+                    self.clipboard_clear()
+                    self.clipboard_append(str(row["result"]))
+                    self.add_history("math", row["query"], str(row["result"]))
+                    self.query_var.set(str(row["result"]))
+                    self.entry.icursor(END)
+                    self.entry.selection_range(0, END)
+                    self._run_search()
+                    
+            elif rtype == "history":
+                if row.get("type") == "math":
+                    self.query_var.set(str(row["result"]))
+                    self.entry.icursor(END)
+                    self.entry.selection_range(0, END)
+                    self._run_search()
+                else:
+                    self.query_var.set(row.get("query"))
+                    self.history_mode = False
+                    self.history_btn.configure(fg=C.TEXT_MUTED)
+                    self.lens_icon.configure(text="⌕")
+                    self.entry.icursor(END)
+                    self._run_search()
+                    if self._results and self._results[0][0] == "pdf":
+                        self._open_index(0)
+                        
+            elif rtype == "pdf":
+                self.add_history("search", self.query_var.get().strip(), "")
+                self.app.open_bookmark_row(row)
+                self.hide()
 
     def _open_selected(self, event=None):
         if self._results:
@@ -1532,6 +1731,7 @@ class DetailPanel(Frame):
         self.lbl_path.pack(anchor=W)
 
     def update_row(self, row, group_str: str):
+        import pandas as pd
         self._current_row = row
         self.lbl_title.configure(text=str(row.get("title", "")))
         self._fields["file"].configure(text=str(row.get("pdf_name", "")))
@@ -1631,8 +1831,17 @@ class BookmarkApp:
         self._load_library_on_startup()
 
         self.root.protocol("WM_DELETE_WINDOW", self._on_close_button)
+        self.root.bind("<F1>", lambda e: self.show_help())
         self._init_tray()
         self._register_hotkey()
+
+    def show_help(self):
+        import webbrowser
+        help_path = Path(__file__).with_name("HuongDanSuDung.html")
+        if help_path.exists():
+            webbrowser.open(help_path.as_uri())
+        else:
+            messagebox.showinfo("Hướng dẫn", "Không tìm thấy file Hướng dẫn sử dụng.")
 
     def _load_config(self) -> dict:
         if CONFIG_FILE.exists():
@@ -1863,30 +2072,82 @@ class BookmarkApp:
         self._group_items_frame.bind("<Configure>", _on_frame_cfg)
         self._group_canvas.bind("<Configure>", _on_canvas_cfg)
 
+        def _on_mousewheel(e):
+            if self._group_canvas.winfo_exists():
+                self._group_canvas.yview_scroll(int(-1 * (e.delta / 120)), "units")
+
+        def _bind_to_mousewheel(event):
+            self.root.bind_all("<MouseWheel>", _on_mousewheel)
+            self.root.bind_all("<Button-4>", lambda e: self._group_canvas.yview_scroll(-1, "units"))
+            self.root.bind_all("<Button-5>", lambda e: self._group_canvas.yview_scroll(1, "units"))
+
+        def _unbind_from_mousewheel(event):
+            self.root.unbind_all("<MouseWheel>")
+            self.root.unbind_all("<Button-4>")
+            self.root.unbind_all("<Button-5>")
+
+        group_scroll_wrap.bind("<Enter>", _bind_to_mousewheel)
+        group_scroll_wrap.bind("<Leave>", _unbind_from_mousewheel)
+
         self._group_item_widgets = {}
         self.group_filter_var = StringVar(value=self.ALL_GROUPS_LABEL)
+        self.pdf_filter_var = StringVar(value="")
         self._refresh_group_filter_values()
 
     def _select_group(self, name: str):
+        if hasattr(self, "pdf_filter_var"):
+            self.pdf_filter_var.set("")
         self.group_filter_var.set(name)
+        self._refresh_group_filter_values()
+        self.apply_filter()
+
+    def _select_pdf(self, pdf_path: str):
+        if hasattr(self, "pdf_filter_var"):
+            self.pdf_filter_var.set(pdf_path)
         self._highlight_group_items()
         self.apply_filter()
 
     def _highlight_group_items(self):
-        selected = self.group_filter_var.get()
-        for name, (row, name_lbl, count_lbl) in self._group_item_widgets.items():
-            is_sel = name == selected
-            bg = C.PRIMARY_LIGHT if is_sel else C.SURFACE
-            fg = C.PRIMARY if is_sel else C.TEXT
-            row.configure(bg=bg)
-            name_lbl.configure(bg=bg, fg=fg, font=F(9.5, "bold" if is_sel else "normal"))
-            badge_bg = C.PRIMARY if is_sel else C.BUTTON_BG
-            badge_fg = C.TEXT_ON_PRIMARY if is_sel else C.TEXT_MUTED
+        selected_group = self.group_filter_var.get()
+        selected_pdf = getattr(self, "pdf_filter_var", StringVar()).get()
+
+        for name, widgets in self._group_item_widgets.items():
+            if not widgets:
+                continue
+            group_row = widgets[0]
+            name_lbl = widgets[1]
+            count_lbl = widgets[2]
+
+            is_sel_group = (name == selected_group)
+            
+            group_bg = C.PRIMARY_LIGHT if (is_sel_group and not selected_pdf) else C.SURFACE
+            group_fg = C.PRIMARY if (is_sel_group and not selected_pdf) else C.TEXT
+            
+            group_row.configure(bg=group_bg)
+            name_lbl.configure(bg=group_bg, fg=group_fg, font=F(9.5, "bold" if is_sel_group else "normal"))
+            badge_bg = C.PRIMARY if is_sel_group else C.BUTTON_BG
+            badge_fg = C.TEXT_ON_PRIMARY if is_sel_group else C.TEXT_MUTED
             count_lbl.configure(bg=badge_bg, fg=badge_fg)
+
+            i = 3
+            while i < len(widgets):
+                pdf_row = widgets[i]
+                pdf_lbl = widgets[i+1]
+                pdf_path = getattr(pdf_row, "pdf_path", "")
+                
+                is_sel_pdf = (pdf_path == selected_pdf)
+                pdf_bg = C.PRIMARY_LIGHT if is_sel_pdf else C.SURFACE
+                pdf_fg = C.PRIMARY if is_sel_pdf else C.TEXT_MUTED
+                
+                pdf_row.configure(bg=pdf_bg)
+                pdf_lbl.configure(bg=pdf_bg, fg=pdf_fg, font=F(9, "bold" if is_sel_pdf else "normal"))
+                
+                i += 2
 
     def _refresh_group_filter_values(self):
         for widgets in self._group_item_widgets.values():
-            widgets[0].destroy()
+            for w in widgets:
+                w.destroy()
         self._group_item_widgets = {}
 
         groups = self.config.get("groups", {})
@@ -1895,10 +2156,16 @@ class BookmarkApp:
         names = [self.ALL_GROUPS_LABEL] + list(groups.keys())
         if self.group_filter_var.get() not in names:
             self.group_filter_var.set(self.ALL_GROUPS_LABEL)
+            if hasattr(self, "pdf_filter_var"):
+                self.pdf_filter_var.set("")
+
+        active_group = self.group_filter_var.get()
 
         for name in names:
             count = total_files if name == self.ALL_GROUPS_LABEL else len(groups.get(name, []))
-            icon = "•"
+            icon = "▾" if name == active_group and count > 0 and name != self.ALL_GROUPS_LABEL else "▸"
+            if name == self.ALL_GROUPS_LABEL:
+                icon = "•"
             
             row = Frame(self._group_items_frame, bg=C.SURFACE, cursor="hand2")
             row.pack(fill=X, pady=1)
@@ -1918,7 +2185,29 @@ class BookmarkApp:
             for w in (row, name_lbl, count_lbl):
                 w.bind("<Button-1>", lambda e, n=name: self._select_group(n))
             
-            self._group_item_widgets[name] = (row, name_lbl, count_lbl)
+            widgets_list = [row, name_lbl, count_lbl]
+
+            if name == active_group and name != self.ALL_GROUPS_LABEL:
+                pdf_paths = groups.get(name, [])
+                for p in pdf_paths:
+                    pdf_name = Path(p).name
+                    pdf_row = Frame(self._group_items_frame, bg=C.SURFACE, cursor="hand2")
+                    pdf_row.pack(fill=X, pady=0)
+                    
+                    pdf_lbl = Label(
+                        pdf_row, text=f"   ↳ {pdf_name}", anchor="w", justify=LEFT,
+                        bg=C.SURFACE, fg=C.TEXT_MUTED, font=F(9), padx=8, pady=4,
+                    )
+                    pdf_lbl.pack(side=LEFT, fill=X, expand=True)
+
+                    for w in (pdf_row, pdf_lbl):
+                        w.bind("<Button-1>", lambda e, path=p: self._select_pdf(path))
+                    
+                    pdf_row.pdf_path = p
+                    pdf_lbl.pdf_path = p
+                    widgets_list.extend([pdf_row, pdf_lbl])
+
+            self._group_item_widgets[name] = widgets_list
 
         self._highlight_group_items()
 
@@ -2128,9 +2417,6 @@ class BookmarkApp:
     def show_group_manager(self):
         groups = self.config.setdefault("groups", {})
         library = self.config.get("library", [])
-        if not library:
-            messagebox.showinfo("Trống", "Chưa có file PDF nào để đưa vào nhóm.")
-            return
         GroupManagerDialog(self.root, groups, library, on_change=self._on_groups_changed)
 
     def _on_groups_changed(self):
@@ -2420,6 +2706,10 @@ class BookmarkApp:
             if in_group:
                 group_paths = set(self.config.get("groups", {}).get(group_name, []))
                 df_work = df_work[df_work["pdf_path"].isin(group_paths)]
+
+            pdf_filter = getattr(self, "pdf_filter_var", StringVar()).get()
+            if pdf_filter:
+                df_work = df_work[df_work["pdf_path"] == pdf_filter]
 
             if keyword:
                 scores = df_work.apply(

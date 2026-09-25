@@ -1,8 +1,8 @@
 {
   "library": [
     {
-      "name": "bó vỉa đá 100x150mm.pdf",
-      "path": "C:\\Users\\KTTC CAU - NGHIA\\Downloads\\bó vỉa đá 100x150mm.pdf"
+      "name": "Quyen 1.2.2 Ban ve cau nut Dao Tri 1.4.pdf",
+      "path": "D:\\GoogleDrive\\PHU MY 2\\2. HS Thiet Ke\\III. Phân đoạn Thi công xây dựng nút giao Đào Tri\\Quyen 1.2.2 Ban ve cau nut Dao Tri 1.4.pdf"
     },
     {
       "name": "Quyen 1.2.2 Ban ve cau nut Dao Tri 4.4.pdf",
@@ -11,6 +11,62 @@
   ],
   "viewer_exe": "",
   "viewer_template": "",
-  "groups": {},
-  "hotkey": "double_shift"
+  "groups": {
+    "Phú Mỹ 2": [
+      "D:\\GoogleDrive\\PHU MY 2\\2. HS Thiet Ke\\III. Phân đoạn Thi công xây dựng nút giao Đào Tri\\Quyen 1.2.2 Ban ve cau nut Dao Tri 1.4.pdf",
+      "D:\\GoogleDrive\\PHU MY 2\\2. HS Thiet Ke\\III. Phân đoạn Thi công xây dựng nút giao Đào Tri\\Quyen 1.2.2 Ban ve cau nut Dao Tri 4.4.pdf"
+    ],
+    "Nhóm 2": [
+      "D:\\GoogleDrive\\PHU MY 2\\2. HS Thiet Ke\\III. Phân đoạn Thi công xây dựng nút giao Đào Tri\\Quyen 1.2.2 Ban ve cau nut Dao Tri 1.4.pdf",
+      "D:\\GoogleDrive\\PHU MY 2\\2. HS Thiet Ke\\III. Phân đoạn Thi công xây dựng nút giao Đào Tri\\Quyen 1.2.2 Ban ve cau nut Dao Tri 4.4.pdf"
+    ],
+    "1": [],
+    "2": [],
+    "3": [],
+    "4": [],
+    "5": []
+  },
+  "hotkey": "double_shift",
+  "history": [
+    {
+      "type": "math",
+      "query": "+12+4+5",
+      "result": "21"
+    },
+    {
+      "type": "math",
+      "query": "12+2",
+      "result": "14"
+    },
+    {
+      "type": "math",
+      "query": "+15+5",
+      "result": "20"
+    },
+    {
+      "type": "search",
+      "query": "mba",
+      "result": ""
+    },
+    {
+      "type": "math",
+      "query": "12+2+4",
+      "result": "18"
+    },
+    {
+      "type": "math",
+      "query": "12+6*8",
+      "result": "60"
+    },
+    {
+      "type": "math",
+      "query": "12+9",
+      "result": "21"
+    },
+    {
+      "type": "math",
+      "query": "+21+3",
+      "result": "24"
+    }
+  ]
 }

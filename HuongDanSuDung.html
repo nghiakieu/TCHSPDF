@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hướng Dẫn Sử Dụng - Quản Lý Bookmark PDF</title>
+    <style>
+        :root {
+            --bg: #1e1e1e;
+            --surface: #2d2d30;
+            --primary: #007acc;
+            --text: #cccccc;
+            --text-muted: #858585;
+            --border: #3e3e42;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background-color: var(--surface);
+            padding: 30px 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+        }
+        h1, h2, h3 {
+            color: #ffffff;
+            margin-top: 1.5em;
+        }
+        h1 {
+            text-align: center;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        .kbd {
+            background-color: #404040;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 0.9em;
+            color: #fff;
+            font-family: monospace;
+            box-shadow: 0 2px 0 #222;
+        }
+        .highlight {
+            color: var(--primary);
+            font-weight: bold;
+        }
+        .note {
+            background-color: rgba(0, 122, 204, 0.1);
+            border-left: 4px solid var(--primary);
+            padding: 10px 15px;
+            margin: 15px 0;
+            border-radius: 0 4px 4px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📖 Hướng Dẫn Sử Dụng<br><span style="font-size: 0.5em; color: var(--text-muted);">Phần Mềm Quản Lý & Tìm Kiếm Bookmark PDF</span></h1>
+
+        <p>Chào mừng bạn đến với ứng dụng Quản lý Bookmark PDF. Ứng dụng được thiết kế tối giản, tốc độ siêu nhanh và cung cấp các tính năng tìm kiếm thông minh mô phỏng trải nghiệm người dùng cao cấp (tương tự Listary hay macOS Spotlight).</p>
+
+        <h2>1. Bảng Tìm Kiếm Nhanh (Quick Search)</h2>
+        <p>Đây là trái tim của ứng dụng, cho phép bạn gọi lên ở bất kỳ đâu trên máy tính.</p>
+        <ul>
+            <li><strong>Mở tìm kiếm nhanh:</strong> Bấm phím <span class="kbd">Shift</span> 2 lần liên tiếp (Shift Shift). <em>(Bạn có thể đổi phím tắt này trong Cài đặt)</em>.</li>
+            <li><strong>Tìm kiếm PDF:</strong> Gõ từ khóa không dấu hoặc có dấu. Kết quả sẽ hiển thị ngay lập tức. Ấn <span class="kbd">Enter</span> để mở file PDF ngay tại trang đó.</li>
+            <li><strong>Phím tắt điều hướng:</strong>
+                <ul>
+                    <li><span class="kbd">Lên</span> / <span class="kbd">Xuống</span>: Chọn kết quả.</li>
+                    <li><span class="kbd">Enter</span>: Mở kết quả đã chọn.</li>
+                    <li><span class="kbd">Esc</span>: Đóng cửa sổ tìm kiếm.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h2>2. Tính Năng Máy Tính (Smart Calculator)</h2>
+        <p>Ô tìm kiếm nhanh được tích hợp sẵn một máy tính thông minh.</p>
+        <ul>
+            <li>Khi bạn nhập một biểu thức toán học (VD: <code>150 * 4 + 20</code>, hoặc <code>sqrt(169)</code>), kết quả sẽ hiện ra ngay bên dưới.</li>
+            <li>Bấm <span class="kbd">Enter</span>: Kết quả sẽ tự động được <strong>Copy vào Clipboard</strong> để bạn dán (Ctrl+V) vào bất kỳ đâu.</li>
+            <li>Hỗ trợ các hàm nâng cao: <code>sin()</code>, <code>cos()</code>, <code>sqrt()</code>, <code>abs()</code>, <code>pi</code>...</li>
+        </ul>
+
+        <h2>3. Chế Độ Lịch Sử (History Mode)</h2>
+        <p>Ứng dụng tự động lưu lại các từ khóa tìm kiếm và các phép tính gần nhất.</p>
+        <ul>
+            <li><strong>Mở/Đóng Lịch sử:</strong> Bấm phím <span class="kbd">Mũi tên Phải (→)</span> hoặc click vào biểu tượng 🕒.</li>
+            <li><strong>Tính năng "Live Math":</strong> Trong chế độ Lịch sử, dòng trên cùng dành riêng cho việc tính toán trực tiếp. Khi bạn gõ phép tính và ấn <span class="kbd">Enter</span>, kết quả sẽ được bôi đen và giữ nguyên trên ô gõ để bạn có thể <strong>tính toán nối tiếp nhiều dòng</strong> mà không bị tắt cửa sổ.</li>
+            <li><strong>Tìm lại file cũ:</strong> Dùng mũi tên chọn một từ khóa đã tìm trong lịch sử, ấn <span class="kbd">Enter</span>, chương trình sẽ tự tìm và mở ngay file đó, đồng thời thoát nhanh cửa sổ tìm kiếm.</li>
+        </ul>
+
+        <h2>4. Quản Lý Thư Viện Cửa Sổ Chính</h2>
+        <p>Mở cửa sổ chính bằng cách bấm nút <strong>[ ↗ ]</strong> trên ô tìm kiếm nhanh hoặc click đúp vào biểu tượng ở khay hệ thống (Góc phải màn hình).</p>
+        <ul>
+            <li><strong>Thêm Dữ Liệu:</strong> Click "Chọn thư mục chứa PDF" để ứng dụng tự động quét tất cả bookmark của các file PDF có trong thư mục đó.</li>
+            <li><strong>Tạo Nhóm:</strong> Bấm vào "Quản lý nhóm" để gom các file PDF liên quan vào từng nhóm. Bạn có thể Tạo mới, Đổi tên hoặc Xóa nhóm linh hoạt.</li>
+            <li><strong>Thêm file vào nhóm:</strong> Trong danh sách kết quả, click chuột phải vào file và chọn <em>"Thêm vào nhóm..."</em>.</li>
+            <li><strong>Cài đặt phím tắt:</strong> Nhấn nút "Cài đặt phím tắt" (Biểu tượng bàn phím) để đổi phím tắt gọi Quick Search (Ví dụ đổi thành Alt+Space hoặc Ctrl+Space).</li>
+        </ul>
+
+        <div class="note">
+            <strong>Mẹo nhỏ:</strong> Bạn luôn có thể ấn <span class="kbd">F1</span> bất cứ lúc nào khi ứng dụng đang mở để xem lại hướng dẫn này. Phần mềm luôn chạy ngầm ở góc dưới bên phải màn hình (System Tray), để thoát hoàn toàn bạn hãy chuột phải vào icon đó và chọn "Thoát".
+        </div>
+
+    </div>
+</body>
+</html>
