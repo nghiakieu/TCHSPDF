@@ -1,0 +1,9 @@
+# --- Bắt buộc: đọc PDF + xử lý bảng dữ liệu bookmark ---
+pikepdf>=8.0
+pandas>=2.0
+
+# --- Tuỳ chọn: khay hệ thống + phím tắt gọi nhanh toàn cục (kiểu Listary) ---
+# Hoạt động tốt nhất trên Windows.
+pystray>=0.19.5
+Pillow>=10.0
+keyboard>=0.13.5

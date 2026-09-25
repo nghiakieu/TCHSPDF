@@ -1,0 +1,6 @@
+{
+  "name": "Tra cứu hồ sơ PDF",
+  "description": "Ứng dụng tra cứu bookmark hồ sơ bản vẽ PDF phong cách Listary với tìm kiếm nhanh, quản lý nhóm và phím tắt thông minh.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

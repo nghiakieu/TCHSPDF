@@ -1,0 +1,31 @@
+================================================================================
+HƯỚNG DẪN CÀI ĐẶT VÀ SỬ DỤNG ỨNG DỤNG TRA CỨU HỒ SƠ PDF
+(Phong cách Listary - Hỗ trợ Windows 7, 8, 10, 11)
+================================================================================
+
+I. CÁCH 1: CHẠY NGAY TRỰC TIẾP TRÊN MÁY TÍNH
+--------------------------------------------------------------------------------
+1. Chỉ cần nhấp đúp vào file: 'Chay_Ung_Dung.bat'
+2. Ứng dụng sẽ tự động khởi động ngay lập tức với thanh tìm kiếm bo tròn 4 góc.
+3. Nếu máy chưa có thư viện, script sẽ tự động thông báo và hướng dẫn cụ thể.
+
+II. CÁCH 2: TẠO FILE THỰC THI (.EXE) HOẶC BỘ CÀI ĐẶT ĐỘC LẬP (DÙNG CHO MỌI MÁY)
+--------------------------------------------------------------------------------
+1. Nhấp đúp vào file 'build_installer.bat'.
+2. Script sẽ tự động cài đặt các thư viện và biên dịch toàn bộ chương trình thành 
+   file độc lập 'TraCuuBanVePDF.exe' trong thư mục 'dist\TraCuuBanVePDF\'.
+3. Bạn có thể chép thư mục này vào USB mang sang bất kỳ máy tính Windows nào khác
+   để sử dụng trực tiếp mà không cần cài đặt Python.
+4. Nếu muốn tạo file cài đặt 'Setup_TraCuuBanVePDF_v1.0.exe' có icon ngoài Desktop
+   và tự khởi động cùng Windows: Tải Inno Setup (miễn phí) và mở file
+   'installer_script.iss' rồi bấm Compile.
+
+III. CÁC TÍNH NĂNG VÀ PHÍM TẮT CHÍNH
+--------------------------------------------------------------------------------
+- Gõ đúp phím Shift (Shift Shift): Bật / tắt thanh tìm kiếm nhanh nổi ở bất kỳ đâu.
+- Khi bật thanh tìm kiếm nhanh, bảng điều khiển chính sẽ ẩn đi để không vướng màn hình.
+- Phím mũi tên Lên/Xuống: Chọn bản vẽ trong danh sách kết quả.
+- Phím Enter: Mở bản vẽ PDF và nhảy thẳng đến trang bản vẽ tương ứng.
+- Phím Esc: Đóng thanh tìm kiếm nhanh.
+- Logo phần mềm được ghim trên thanh Taskbar và góc Khay hệ thống (System Tray).
+================================================================================

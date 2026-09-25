@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <filter id="drop-shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" flood-color="#000000" flood-opacity="0.2"/>
+    </filter>
+    <!-- Glass lens reflection gradient -->
+    <linearGradient id="lensGlass" x1="20%" y1="20%" x2="80%" y2="80%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9"/>
+      <stop offset="40%" stop-color="#E0F2FE" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#BAE6FD" stop-opacity="0.6"/>
+    </linearGradient>
+    <!-- Handle gradient -->
+    <linearGradient id="handleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBBF24"/>
+      <stop offset="40%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+    <!-- Document fold gradient -->
+    <linearGradient id="foldGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FCA5A5"/>
+      <stop offset="100%" stop-color="#FECDD3"/>
+    </linearGradient>
+  </defs>
+
+  <g >
+    <!-- Under-sheet / White base layer border -->
+    <path d="M 9 6 C 9 3.5 11 2 13.5 2 L 43.5 2 L 55 13.5 L 55 57 C 55 59.5 53 61.5 50.5 61.5 L 13.5 61.5 C 11 61.5 9 59.5 9 57 Z" fill="#FFFFFF"/>
+
+    <!-- Red Document Body -->
+    <!-- Cut corner at top right for the fold -->
+    <path d="M 10 7 C 10 5 11.5 3.5 14 3.5 L 43 3.5 L 53.5 14 L 53.5 56 C 53.5 58.5 52 60 49.5 60 L 14 60 C 11.5 60 10 58.5 10 56 Z" fill="#EF4444"/>
+
+    <!-- Folded Flap Corner (Top Right) -->
+    <!-- Darker under-triangle for shadow -->
+    <path d="M 43 3.5 L 43 14 L 53.5 14 Z" fill="#B91C1C" opacity="0.35"/>
+    <!-- The actual fold paper -->
+    <path d="M 43 3.5 L 53.5 14 L 43 14 Z" fill="url(#foldGrad)"/>
+
+    <!-- Document Text: 'PDF' -->
+    <text x="14.5" y="28" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="900" fill="#FFFFFF" letter-spacing="-0.5">PDF</text>
+
+    <!-- Content Lines below PDF -->
+    <!-- Line 1 -->
+    <rect x="15" y="33" width="18" height="3.2" rx="1.6" fill="#FCA5A5"/>
+    <!-- Line 2 -->
+    <rect x="15" y="39.5" width="18" height="3.2" rx="1.6" fill="#FCA5A5"/>
+    <!-- Line 3 -->
+    <rect x="15" y="46" width="12" height="3.2" rx="1.6" fill="#FCA5A5"/>
+
+    <!-- Magnifying Glass Handle -->
+    <!-- Golden/Orange Diagonal Handle -->
+    <g transform="rotate(42, 38, 38)">
+      <!-- Handle Collar/Mount -->
+      <rect x="35.5" y="50" width="5" height="2.5" rx="1" fill="#1E40AF"/>
+      <!-- Handle Body -->
+      <path d="M 36 52.5 L 40 52.5 L 40.8 68 C 40.8 69.5 39.5 70.5 38 70.5 C 36.5 70.5 35.2 69.5 35.2 68 Z" fill="url(#handleGrad)" stroke="#B45309" stroke-width="0.6"/>
+      <!-- Handle Highlight -->
+      <line x1="37.2" y1="54" x2="37.2" y2="67" stroke="#FDE68A" stroke-width="0.8" stroke-linecap="round" opacity="0.8"/>
+    </g>
+
+    <!-- Magnifying Glass Lens Rim & Glass -->
+    <!-- Outer Blue Rim -->
+    <circle cx="38" cy="38" r="13.5" fill="url(#lensGlass)" stroke="#2563EB" stroke-width="3.2"/>
+    <circle cx="38" cy="38" r="11.8" fill="none" stroke="#60A5FA" stroke-width="0.8" opacity="0.6"/>
+
+    <!-- Specular Highlight / Glass Crescent -->
+    <path d="M 29 35 C 30 30 35 27 41 27.5 C 37 28 32 31 31 36 Z" fill="#FFFFFF" opacity="0.85"/>
+    <circle cx="32" cy="33" r="1" fill="#FFFFFF" opacity="0.9"/>
+  </g>
+</svg>
