@@ -465,7 +465,7 @@ class GroupPickerDialog(Toplevel):
 class LibraryDialog(Toplevel):
     def __init__(self, parent, library, on_remove, on_update_paths, on_add_to_group, get_group_names):
         super().__init__(parent)
-        self.title("Danh sách file PDF đã thêm")
+        self.title("Danh sách file PDF")
         self.configure(bg=C.BG)
         self.geometry("860x520")
         self.minsize(720, 420)
@@ -476,7 +476,7 @@ class LibraryDialog(Toplevel):
 
         # Dòng nhắc nhở giữ trên 1 dòng duy nhất, không bị ngắt quãng
         dialog_header(
-            self, "📁  Danh sách file PDF đã thêm",
+            self, "📁  Danh sách file PDF",
             "Có thể chọn nhiều dòng cùng lúc (giữ Ctrl hoặc Shift) để cập nhật đường dẫn hoặc thêm vào nhóm hàng loạt.",
         )
 
@@ -501,10 +501,10 @@ class LibraryDialog(Toplevel):
 
         btns = Frame(self, bg=C.BG)
         btns.pack(fill=X, padx=18, pady=(0, 16))
-        mk_button(btns, "Cập nhật đường dẫn...", command=self.update_paths, kind="secondary").pack(
+        mk_button(btns, "Cập nhật đường dẫn", command=self.update_paths, kind="secondary").pack(
             side=LEFT, padx=(0, 8)
         )
-        mk_button(btns, "Thêm vào nhóm...", command=self.add_to_group, kind="secondary").pack(
+        mk_button(btns, "Thêm vào nhóm", command=self.add_to_group, kind="secondary").pack(
             side=LEFT, padx=(0, 8)
         )
         mk_button(btns, "Xoá khỏi danh sách", command=self.remove_selected, kind="danger").pack(side=LEFT)
@@ -1805,6 +1805,9 @@ class BookmarkApp:
         mk_button(tools, "＋  Thêm file PDF", command=self.add_pdfs, kind="secondary").pack(
             fill=X, pady=(0, 4)
         )
+        mk_button(tools, "📑  Tạo Bookmark từ Excel", command=self.create_bookmark_from_excel, kind="secondary").pack(
+            fill=X, pady=(0, 4)
+        )
         mk_button(tools, "📁  Danh sách file đã thêm", command=self.show_library, kind="secondary").pack(
             fill=X, pady=(0, 4)
         )
@@ -1905,6 +1908,57 @@ class BookmarkApp:
             self._group_item_widgets[name] = (row, name_lbl, count_lbl)
 
         self._highlight_group_items()
+
+    def create_bookmark_from_excel(self):
+        try:
+            from tao_bookmark_pdf import doc_danh_sach_bookmark, tao_pdf_co_bookmark
+        except ImportError:
+            messagebox.showerror("Lỗi", "Không tìm thấy công cụ tạo bookmark (tao_bookmark_pdf.py).", parent=self.root)
+            return
+
+        excel_path = filedialog.askopenfilename(
+            title="Chọn file Excel chứa danh sách bookmark",
+            filetypes=[("Excel files", "*.xlsx *.xls"), ("Tất cả file", "*.*")],
+            parent=self.root
+        )
+        if not excel_path:
+            return
+
+        pdf_path = filedialog.askopenfilename(
+            title="Chọn file PDF cần tạo bookmark",
+            filetypes=[("PDF files", "*.pdf"), ("Tất cả file", "*.*")],
+            parent=self.root
+        )
+        if not pdf_path:
+            return
+
+        try:
+            danh_sach = doc_danh_sach_bookmark(excel_path)
+            if not danh_sach:
+                messagebox.showwarning("Không có dữ liệu", "Không tìm thấy dữ liệu bookmark hợp lệ trong file Excel.\nKiểm tra lại: cột 1 là nội dung, cột 2 là số trang (số nguyên).", parent=self.root)
+                return
+
+            dong_y = messagebox.askyesno(
+                "Xác nhận ghi đè",
+                f"Chương trình sẽ GHI ĐÈ bookmark trực tiếp lên file:\n\n{pdf_path}\n\nBạn có muốn tiếp tục không?",
+                parent=self.root
+            )
+            if not dong_y:
+                return
+            
+            so_them, so_bo_qua = tao_pdf_co_bookmark(pdf_path, danh_sach)
+            ket_qua = f"✅ HOÀN TẤT! Đã thêm {so_them} bookmark.\n"
+            if so_bo_qua:
+                ket_qua += f"⚠️  Có {so_bo_qua} bookmark bị bỏ qua do số trang không hợp lệ.\n"
+            ket_qua += f"📄 Đã ghi đè trực tiếp lên file:\n{pdf_path}"
+            
+            messagebox.showinfo("Hoàn tất", ket_qua, parent=self.root)
+
+            # Tự động cập nhật lại file PDF nếu file đó đang có trong phần mềm
+            self._reload_pdf_if_needed(pdf_path)
+
+        except Exception as e:
+            messagebox.showerror("Lỗi", f"Có lỗi xảy ra:\n\n{e}", parent=self.root)
 
     def add_pdfs(self):
         paths = filedialog.askopenfilenames(title="Chọn file PDF", filetypes=[("PDF files", "*.pdf")])
