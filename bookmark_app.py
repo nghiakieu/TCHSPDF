@@ -1913,13 +1913,22 @@ class BookmarkApp:
 
         norm_paths = [str(Path(p).resolve()) for p in paths]
         existing_paths = {str(Path(item["path"]).resolve()) for item in self.config.get("library", [])}
+        
+        active_group = self.group_filter_var.get()
+        if active_group == self.ALL_GROUPS_LABEL:
+            active_group = None
+
         for p in norm_paths:
             if p not in existing_paths:
                 self.config.setdefault("library", []).append({"name": Path(p).name, "path": p})
+            if active_group:
+                groups = self.config.setdefault("groups", {})
+                group_list = groups.setdefault(active_group, [])
+                if p not in group_list:
+                    group_list.append(p)
+                    
         self._save_config()
 
-        # Đặt lại bộ lọc nhóm về Tất cả các nhóm để file mới thêm hiển thị ngay
-        self.group_filter_var.set(self.ALL_GROUPS_LABEL)
         self._refresh_group_filter_values()
 
         # Nạp dữ liệu bookmark và đồng bộ lên giao diện ngay lập tức
@@ -2447,11 +2456,21 @@ class BookmarkApp:
             return
         norm_paths = [str(Path(p).resolve()) for p in pdf_paths]
         existing = {str(Path(i["path"]).resolve()) for i in self.config.get("library", [])}
+        
+        active_group = self.group_filter_var.get()
+        if active_group == self.ALL_GROUPS_LABEL:
+            active_group = None
+
         for p in norm_paths:
             if p not in existing:
                 self.config.setdefault("library", []).append({"name": Path(p).name, "path": p})
+            if active_group:
+                groups = self.config.setdefault("groups", {})
+                group_list = groups.setdefault(active_group, [])
+                if p not in group_list:
+                    group_list.append(p)
+                    
         self._save_config()
-        self.group_filter_var.set(self.ALL_GROUPS_LABEL)
         self._refresh_group_filter_values()
         self._parse_and_merge(norm_paths)
 
