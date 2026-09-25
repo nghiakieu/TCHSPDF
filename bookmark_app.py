@@ -184,6 +184,19 @@ def setup_style(root: Tk) -> None:
     )
 
     _cfg_button(
+        "AppSidebar.TButton",
+        background=C.BUTTON_BG, foreground=C.TEXT,
+        bordercolor=C.BORDER_STRONG, lightcolor=C.BUTTON_BG, darkcolor=C.BUTTON_BG,
+        font=F(8.5), padding=(10, 6)
+    )
+    style.map(
+        "AppSidebar.TButton",
+        background=[("pressed", C.PRIMARY_LIGHT), ("active", C.PRIMARY_LIGHT)],
+        foreground=[("pressed", C.PRIMARY), ("active", C.PRIMARY)],
+        bordercolor=[("pressed", C.PRIMARY), ("active", C.PRIMARY)],
+    )
+
+    _cfg_button(
         "AppGhost.TButton",
         background=C.BG, foreground=C.TEXT_MUTED,
         bordercolor=C.BG, lightcolor=C.BG, darkcolor=C.BG, borderwidth=0,
@@ -1801,23 +1814,23 @@ class BookmarkApp:
         tools = Frame(tools_box, bg=C.SURFACE)
         tools.pack(fill=X)
 
-        # Căn lề trái, nút thêm file dùng kiểu secondary đồng bộ nền trắng với các nút khác
-        mk_button(tools, "＋  Thêm file PDF", command=self.add_pdfs, kind="secondary").pack(
+        # Căn lề trái, nút thêm file dùng kiểu sidebar nhỏ gọn
+        mk_button(tools, "＋  Thêm file PDF", command=self.add_pdfs, kind="sidebar").pack(
             fill=X, pady=(0, 4)
         )
-        mk_button(tools, "📑  Tạo Bookmark từ Excel", command=self.create_bookmark_from_excel, kind="secondary").pack(
+        mk_button(tools, "📑  Tạo Bookmark từ Excel", command=self.create_bookmark_from_excel, kind="sidebar").pack(
             fill=X, pady=(0, 4)
         )
-        mk_button(tools, "📁  Danh sách file đã thêm", command=self.show_library, kind="secondary").pack(
+        mk_button(tools, "📁  Danh sách file đã thêm", command=self.show_library, kind="sidebar").pack(
             fill=X, pady=(0, 4)
         )
-        mk_button(tools, "🏷  Quản lý nhóm", command=self.show_group_manager, kind="secondary").pack(
+        mk_button(tools, "🏷  Quản lý nhóm", command=self.show_group_manager, kind="sidebar").pack(
             fill=X, pady=(0, 4)
         )
-        mk_button(tools, "⚙  Phần mềm mở PDF", command=self.show_viewer_settings, kind="secondary").pack(
+        mk_button(tools, "⚙  Phần mềm mở PDF", command=self.show_viewer_settings, kind="sidebar").pack(
             fill=X, pady=(0, 4)
         )
-        mk_button(tools, "⌨  Phím tắt tìm nhanh", command=self.show_hotkey_settings, kind="secondary").pack(
+        mk_button(tools, "⌨  Phím tắt tìm nhanh", command=self.show_hotkey_settings, kind="sidebar").pack(
             fill=X
         )
 
